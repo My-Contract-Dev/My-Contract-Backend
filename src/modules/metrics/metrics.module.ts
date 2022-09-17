@@ -4,9 +4,15 @@ import { ContractModule } from '../contract/contract.module';
 import { CubeModule } from '../cube/cube.module';
 import { AccountMetricsResolver, EventsResolver } from './resolvers';
 import { CallsResolver } from './resolvers/calls.resolver';
+import { GasResolver } from './resolvers/gas.resolver';
 
 @Module({
   imports: [CubeModule, AssetsModule, ContractModule],
-  providers: [AccountMetricsResolver, EventsResolver, CallsResolver],
+  providers: [
+    AccountMetricsResolver,
+    EventsResolver,
+    CallsResolver,
+    GasResolver,
+  ],
 })
 export class MetricsModule {}

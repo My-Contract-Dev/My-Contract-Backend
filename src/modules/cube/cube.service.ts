@@ -129,4 +129,44 @@ export class CubeService {
       timestamp: value.transactions.blockTimestamp!.day as string,
     }));
   }
+
+  async getCallsByGas(address: string, dateRange = 'Last 7 days') {
+    const data = await this.cubeClient.load({
+      order: {
+        'Transactions.averageGas': 'desc',
+      },
+      measures: ['Transactions.averageGas', 'Transactions.gas'],
+      timeDimensions: [
+        {
+          dimension: 'Transactions.blockTimestamp',
+          granularity: 'year',
+          dateRange,
+        },
+      ],
+      dimensions: ['Transactions.callsign'],
+      filters: [
+        {
+          member: 'Transactions.toAddress',
+          operator: 'equals',
+          values: [address],
+        },
+      ],
+    });
+    return data.rawData().map((e) => ({
+      method: e['Transactions.callsign'] as string,
+      averageGas: e['Transactions.averageGas'] as number,
+      totalGas: e['Transactions.gas'] as number,
+    }));
+  }
+
+  async averageGasByDay(address: string, dateRange = 'Last 7 days') {
+    const data = await this.sdk.GasByDayQuery({
+      addresses: [address],
+      dateRange,
+    });
+    return data.cube.map((item) => ({
+      averageGas: item.transactions.averageGas as number,
+      timestamp: item.transactions.blockTimestamp!.day as string,
+    }));
+  }
 }

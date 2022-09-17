@@ -1,0 +1,17 @@
+query GasByDayQuery($addresses: [String!]!, $dateRange: [String!]!) {
+  cube(
+    where: {
+      transactions: {
+        toAddress: { in: $addresses }
+        blockTimestamp: { inDateRange: $dateRange }
+      }
+    }
+  ) {
+    transactions {
+      averageGas
+      blockTimestamp {
+        day
+      }
+    }
+  }
+}
