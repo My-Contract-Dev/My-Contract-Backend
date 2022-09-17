@@ -1,0 +1,17 @@
+query CallsCountQuery($addresses: [String!]!, $dateRange: [String!]!) {
+  cube(
+    where: {
+      transactions: {
+        blockTimestamp: { inDateRange: $dateRange }
+        toAddress: { in: $addresses }
+      }
+    }
+  ) {
+    transactions(orderBy: { blockTimestamp: asc }) {
+      count
+      blockTimestamp {
+        day
+      }
+    }
+  }
+}

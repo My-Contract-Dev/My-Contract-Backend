@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Args, Query } from '@nestjs/graphql';
 import { ContractService } from 'src/modules/contract/contract.service';
 import { CubeService } from 'src/modules/cube/cube.service';
-import { AggregatedEventDto } from '../models';
+import { AggregatedEventDto, SimpleChartValueDto } from '../models';
 
 @Injectable()
 export class EventsResolver {
@@ -26,6 +26,17 @@ export class EventsResolver {
     return data.map((item, index) => ({
       name: decodedTopicNames[index].split('(')[0],
       count: item.count,
+    }));
+  }
+
+  @Query(() => [SimpleChartValueDto])
+  async totalEvents(
+    @Args('address', { nullable: false }) address: string,
+  ): Promise<SimpleChartValueDto[]> {
+    const data = await this.cubeService.getTotalEvents(address);
+    return data.map((item) => ({
+      timestamp: item.timestamp,
+      value: item.count,
     }));
   }
 }

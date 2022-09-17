@@ -105,4 +105,28 @@ export class CubeService {
       count: e['Transactions.count'] as number,
     }));
   }
+
+  async getTotalEvents(address: string, dateRange = 'Last 7 days') {
+    const data = await this.sdk.EventsCountQuery({
+      addresses: [address],
+      dateRange,
+    });
+
+    return data.cube.map((value) => ({
+      count: value.logs.count!,
+      timestamp: value.logs.blockTimestamp!.day as string,
+    }));
+  }
+
+  async getTotalCalls(address: string, dateRange = 'Last 7 days') {
+    const data = await this.sdk.CallsCountQuery({
+      addresses: [address],
+      dateRange,
+    });
+
+    return data.cube.map((value) => ({
+      count: value.transactions.count!,
+      timestamp: value.transactions.blockTimestamp!.day as string,
+    }));
+  }
 }

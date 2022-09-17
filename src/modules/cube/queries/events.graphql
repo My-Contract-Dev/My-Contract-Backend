@@ -1,0 +1,17 @@
+query EventsCountQuery($addresses: [String!]!, $dateRange: [String!]!) {
+  cube(
+    where: {
+      logs: {
+        address: { in: $addresses }
+        blockTimestamp: { inDateRange: $dateRange }
+      }
+    }
+  ) {
+    logs(orderBy: { blockTimestamp: asc }) {
+      count
+      blockTimestamp {
+        day
+      }
+    }
+  }
+}

@@ -9,7 +9,7 @@ import { EvmosScoutService } from '../evmos-scout/evmos-scout.service';
 export class ContractService {
   constructor(private evmosScoutService: EvmosScoutService) {}
 
-  decodeCallsignsFromAbi(
+  private decodeCallsignsFromAbi(
     address: string,
     abi: string,
     callsigns: string[],
@@ -47,7 +47,7 @@ export class ContractService {
     return callsigns;
   }
 
-  decodeTopicsFromAbi(address: string, abi: string, topics: string[]) {
+  private decodeTopicsFromAbi(address: string, abi: string, topics: string[]) {
     const contract = new Contract(address, abi);
     const events = Object.keys(contract.interface.events);
     const eventHashed = events.reduce<Record<string, string>>((acc, e) => {
