@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class AccountMetrics {
@@ -7,4 +7,7 @@ export class AccountMetrics {
 
   @Field(() => Int, { nullable: false })
   users: number;
+
+  @Field(() => Float, { nullable: false })
+  balanceInUsd: number;
 }

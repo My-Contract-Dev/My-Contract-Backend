@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Cacheable } from '@type-cacheable/core';
 import { BigNumber } from 'ethers';
 import { CoinGeckService } from '../coingecko/coingecko.service';
 import { EvmosScoutService } from '../evmos-scout/evmos-scout.service';
@@ -11,6 +12,7 @@ export class CurrencyService {
     private coinGecko: CoinGeckService,
   ) {}
 
+  @Cacheable({ ttlSeconds: 30 })
   async addressAssets({ address, chainId }: IAddress): Promise<IAddressAssets> {
     const tokens = await this.scout.getAddressTokens(chainId, address);
     // TODO: use generic platform

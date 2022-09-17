@@ -1,11 +1,15 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { CubeService } from 'src/modules/cube/cube.service';
+import { CurrencyService } from 'src/modules/currency/currency.service';
 import { AccountMetrics } from '../models';
 
 @Resolver(() => AccountMetrics)
 export class AccountMetricsResolver {
-  constructor(private cube: CubeService) {}
+  constructor(
+    private cube: CubeService,
+    private currencyService: CurrencyService,
+  ) {}
 
   @Query(() => AccountMetrics)
   async accountMetrics(
@@ -18,6 +22,19 @@ export class AccountMetricsResolver {
       addresses,
       dateRange,
     );
-    return cubeContractData;
+    const assets = await this.currencyService.multyAddressAssets(
+      addresses.map((a) => ({
+        address: a,
+        chainId: 9001,
+      })),
+    );
+    return {
+      calls: cubeContractData.calls,
+      users: cubeContractData.users,
+      balanceInUsd: assets.reduce(
+        (acc, a) => acc + a.assets.reduce((acc, a) => acc + a.inUsd, 0),
+        0,
+      ),
+    };
   }
 }

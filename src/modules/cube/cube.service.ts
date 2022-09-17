@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Cacheable } from '@type-cacheable/core';
 import { GraphQLClient } from 'graphql-request';
 import { ICubeContractData } from './models';
 import { getSdk } from './schema.generated';
@@ -22,11 +23,15 @@ export class CubeService {
     this.sdk = getSdk(this.client);
   }
 
+  @Cacheable({ ttlSeconds: 5 })
   async getContractData(
     addresses: string[],
     dateRange: string[] = ['Last 7 days'],
   ): Promise<ICubeContractData> {
-    const data = await this.sdk.AccountData({ addresses, dateRange });
+    const data = await this.sdk.AccountData({
+      addresses: addresses.map((a) => a.toLocaleLowerCase()),
+      dateRange,
+    });
     return data.cube.reduce<ICubeContractData>(
       (acc, item) => ({
         calls: acc.calls + item.transactions.count!,
