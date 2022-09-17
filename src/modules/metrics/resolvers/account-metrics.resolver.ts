@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Args, Query, Resolver } from '@nestjs/graphql';
+import { AssetsService } from 'src/modules/assets/assets.service';
 import { CubeService } from 'src/modules/cube/cube.service';
-import { CurrencyService } from 'src/modules/currency/currency.service';
 import { AccountMetrics } from '../models';
 
 @Resolver(() => AccountMetrics)
 export class AccountMetricsResolver {
   constructor(
     private cube: CubeService,
-    private currencyService: CurrencyService,
+    private currencyService: AssetsService,
   ) {}
 
   @Query(() => AccountMetrics)

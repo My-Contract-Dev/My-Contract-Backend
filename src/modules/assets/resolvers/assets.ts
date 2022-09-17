@@ -1,5 +1,5 @@
 import { Args, Field, InputType, Int, Query, Resolver } from '@nestjs/graphql';
-import { CurrencyService } from '../currency.service';
+import { AssetsService } from '../assets.service';
 import { IAddress, IAddressAssets } from '../interfaces';
 import { AddressAssetsDto } from '../models';
 
@@ -13,15 +13,15 @@ class AddressInputType implements IAddress {
 }
 
 @Resolver(() => AddressAssetsDto)
-export class CurrencyResolver {
-  constructor(private currencyService: CurrencyService) {}
+export class AssetsResolver {
+  constructor(private assetsService: AssetsService) {}
 
   @Query(() => AddressAssetsDto)
   async addressAssets(
     @Args('address', { type: () => AddressInputType, nullable: false })
     address: AddressInputType,
   ): Promise<IAddressAssets> {
-    return this.currencyService.addressAssets(address);
+    return this.assetsService.addressAssets(address);
   }
 
   @Query(() => [AddressAssetsDto])
@@ -29,6 +29,6 @@ export class CurrencyResolver {
     @Args('address', { type: () => [AddressInputType], nullable: false })
     addresses: AddressInputType[],
   ): Promise<IAddressAssets[]> {
-    return this.currencyService.multyAddressAssets(addresses);
+    return this.assetsService.multyAddressAssets(addresses);
   }
 }

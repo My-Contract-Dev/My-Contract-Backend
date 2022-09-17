@@ -6,7 +6,7 @@ import { EvmosScoutService } from '../evmos-scout/evmos-scout.service';
 import { IAddress, IAddressAssets } from './interfaces';
 
 @Injectable()
-export class CurrencyService {
+export class AssetsService {
   constructor(
     private scout: EvmosScoutService,
     private coinGecko: CoinGeckService,

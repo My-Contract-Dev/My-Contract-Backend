@@ -1,0 +1,18 @@
+query TokenTransfers($addresses: [String!]!) {
+  cube(
+    where: {
+      tokenTransfers: {
+        blockTimestamp: { inDateRange: "Last 7 days" }
+        toAddress: { in: $addresses }
+      }
+    }
+  ) {
+    tokenTransfers {
+      value
+      tokenAddress
+      blockTimestamp {
+        year
+      }
+    }
+  }
+}

@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
+import { AssetsModule } from '../assets/assets.module';
 import { CubeModule } from '../cube/cube.module';
-import { CurrencyModule } from '../currency/currency.module';
 import { AccountMetricsResolver } from './resolvers';
 
 @Module({
-  imports: [CubeModule, CurrencyModule],
+  imports: [CubeModule, AssetsModule],
   providers: [AccountMetricsResolver],
 })
 export class MetricsModule {}
