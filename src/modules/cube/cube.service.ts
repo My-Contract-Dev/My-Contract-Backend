@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cacheable } from '@type-cacheable/core';
 import { GraphQLClient } from 'graphql-request';
+import cubejs, { CubejsApi } from '@cubejs-client/core';
+
 import { ICubeContractData } from './models';
 import { getSdk } from './schema.generated';
 
@@ -10,17 +12,21 @@ import { getSdk } from './schema.generated';
 export class CubeService {
   private client: GraphQLClient;
   private sdk: ReturnType<typeof getSdk>;
+  private cubeClient: CubejsApi;
 
   constructor(private configService: ConfigService) {
-    this.client = new GraphQLClient(
-      configService.get<string>('CUBE_ENDPOINT') || '',
-      {
-        headers: {
-          Authorization: configService.get<string>('CUBE_KEY') || '',
-        },
+    const apiToken = configService.get<string>('CUBE_KEY') || '';
+    const apiUrl = configService.get<string>('CUBE_ENDPOINT') || '';
+    const restApiUrl = configService.get<string>('CUBE_REST_ENDPOINT') || '';
+    this.client = new GraphQLClient(apiUrl, {
+      headers: {
+        Authorization: apiToken,
       },
-    );
+    });
     this.sdk = getSdk(this.client);
+    this.cubeClient = cubejs(apiToken, {
+      apiUrl: restApiUrl,
+    });
   }
 
   @Cacheable({ ttlSeconds: 5 })
@@ -42,5 +48,33 @@ export class CubeService {
         users: 0,
       },
     );
+  }
+
+  async getPopularEvents(address: string, dateRange = 'Last 7 days') {
+    const data = await this.cubeClient.load({
+      order: {
+        'Logs.count': 'desc',
+      },
+      measures: ['Logs.count'],
+      timeDimensions: [
+        {
+          dimension: 'Logs.blockTimestamp',
+          granularity: 'year',
+          dateRange,
+        },
+      ],
+      dimensions: ['Logs.eventName'],
+      filters: [
+        {
+          member: 'Logs.address',
+          operator: 'equals',
+          values: [address],
+        },
+      ],
+    });
+    return data.rawData().map((e) => ({
+      topic: e['Logs.eventName'] as string,
+      count: e['Logs.count'] as number,
+    }));
   }
 }

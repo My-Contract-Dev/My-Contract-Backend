@@ -1,5 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
+import { Cacheable } from '@type-cacheable/core';
 import { lastValueFrom } from 'rxjs';
 import { IEvmosScoutResponse, IEvmosScoutTokensBalance } from './models';
 
@@ -35,6 +36,26 @@ export class EvmosScoutService {
         params: {
           module: 'account',
           action: 'balance',
+          address,
+        },
+      }),
+    );
+    if (!data.result) {
+      throw new Error('No data');
+    }
+    return data.result;
+  }
+
+  @Cacheable({ ttlSeconds: 60 * 60 * 24 * 14 })
+  async getContractAbi(
+    chainId: number,
+    address: string,
+  ): Promise<string | undefined> {
+    const { data } = await lastValueFrom(
+      this.httpService.get<IEvmosScoutResponse<string>>('', {
+        params: {
+          module: 'contract',
+          action: 'getabi',
           address,
         },
       }),
