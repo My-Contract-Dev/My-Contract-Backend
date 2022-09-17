@@ -1,7 +1,9 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { CacheModule, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
+import { AppCacheModule } from './modules/cache/cache.module';
+import { CoingeckoModule } from './modules/coingecko/coingecko.module';
 import { CubeModule } from './modules/cube/cube.module';
 import { EvmosScoutModule } from './modules/evmos-scout/evmos-scout.module';
 import { MetricsModule } from './modules/metrics/metrics.module';
@@ -12,11 +14,18 @@ import { MetricsModule } from './modules/metrics/metrics.module';
       driver: ApolloDriver,
       autoSchemaFile: true,
     }),
-    CacheModule.register(),
     ConfigModule.forRoot(),
     MetricsModule,
     CubeModule,
     EvmosScoutModule,
+    AppCacheModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        host: configService.get<string>('REDIS_HOST'),
+      }),
+    }),
+    CoingeckoModule,
   ],
 })
 export class AppModule {}
