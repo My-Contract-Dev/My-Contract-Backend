@@ -28,4 +28,20 @@ export class EvmosScoutService {
     }
     return data.result;
   }
+
+  async getBalance(chainId: number, address: string): Promise<string> {
+    const { data } = await lastValueFrom(
+      this.httpService.get<IEvmosScoutResponse<string>>('', {
+        params: {
+          module: 'account',
+          action: 'balance',
+          address,
+        },
+      }),
+    );
+    if (!data.result) {
+      throw new Error('No data');
+    }
+    return data.result;
+  }
 }

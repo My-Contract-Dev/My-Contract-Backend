@@ -45,6 +45,7 @@
     "chai": "^4.3.6",
     "coingecko-api-v3": "^0.0.13",
     "dotenv": "^16.0.2",
+    "ethers": "^5.7.1",
     "graphql": "^16.6.0",
     "graphql-config": "^4.3.5",
     "ioredis": "^5.2.3",

@@ -1,22 +1,8 @@
 export interface IEvmosScoutTokensBalance {
-  blockHash: string;
-  blockNumber: string;
-  confirmations: string;
+  balance: string;
   contractAddress: string;
-  cumulativeGasUsed: string;
-  from: string;
-  gas: string;
-  gasPrice: string;
-  gasUsed: string;
-  hash: string;
-  input: string;
-  logIndex: string;
-  nonce: string;
-  timeStamp: string;
-  to: string;
-  tokenDecimal: string;
-  tokenName: string;
-  tokenSymbol: string;
-  transactionIndex: string;
-  value: string;
+  decimals: string;
+  name: string;
+  symbol: string;
+  type: string;
 }

@@ -5,6 +5,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { AppCacheModule } from './modules/cache/cache.module';
 import { CoingeckoModule } from './modules/coingecko/coingecko.module';
 import { CubeModule } from './modules/cube/cube.module';
+import { CurrencyModule } from './modules/currency/currency.module';
 import { EvmosScoutModule } from './modules/evmos-scout/evmos-scout.module';
 import { MetricsModule } from './modules/metrics/metrics.module';
 
@@ -26,6 +27,7 @@ import { MetricsModule } from './modules/metrics/metrics.module';
       }),
     }),
     CoingeckoModule,
+    CurrencyModule,
   ],
 })
 export class AppModule {}
