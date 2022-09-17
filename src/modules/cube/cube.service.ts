@@ -77,4 +77,32 @@ export class CubeService {
       count: e['Logs.count'] as number,
     }));
   }
+
+  async getPopularCalls(address: string, dateRange = 'Last 7 days') {
+    const data = await this.cubeClient.load({
+      order: {
+        'Transactions.count': 'desc',
+      },
+      measures: ['Transactions.count'],
+      timeDimensions: [
+        {
+          dimension: 'Transactions.blockTimestamp',
+          granularity: 'year',
+          dateRange,
+        },
+      ],
+      dimensions: ['Transactions.callsign'],
+      filters: [
+        {
+          member: 'Transactions.toAddress',
+          operator: 'equals',
+          values: [address],
+        },
+      ],
+    });
+    return data.rawData().map((e) => ({
+      method: e['Transactions.callsign'] as string,
+      count: e['Transactions.count'] as number,
+    }));
+  }
 }
