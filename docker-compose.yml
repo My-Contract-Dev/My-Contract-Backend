@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    volumes:
+      - ./:/app:cached
+      - /app/node_modules
+      - /app/dist
+    ports:
+      - '3000:3000'
+    command: npm run start:dev
+    depends_on:
+      - redis
+  redis:
+    image: redis
