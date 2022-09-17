@@ -35,6 +35,11 @@ export class AccountMetricsResolver {
         (acc, a) => acc + a.assets.reduce((acc, a) => acc + a.inUsd, 0),
         0,
       ),
+      contracts: assets.map((item) => ({
+        address: item.address,
+        chainId: 9001,
+        balanceInUsd: item.assets.reduce((acc, a) => acc + a.inUsd, 0),
+      })),
     };
   }
 }
