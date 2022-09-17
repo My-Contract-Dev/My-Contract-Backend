@@ -1,8 +1,8 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { CubeModule } from './modules/cube/cube.module';
 import { MetricsModule } from './modules/metrics/metrics.module';
 
 @Module({
@@ -11,9 +11,9 @@ import { MetricsModule } from './modules/metrics/metrics.module';
       driver: ApolloDriver,
       autoSchemaFile: true,
     }),
+    ConfigModule.forRoot(),
     MetricsModule,
+    CubeModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

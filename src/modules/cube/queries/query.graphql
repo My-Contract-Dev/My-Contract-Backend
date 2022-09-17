@@ -1,0 +1,18 @@
+query AccountData($addresses: [String!]!, $dateRange: [String!]!) {
+  cube(
+    where: {
+      transactions: {
+        toAddress: { in: $addresses }
+        blockTimestamp: { inDateRange: $dateRange }
+      }
+    }
+  ) {
+    transactions {
+      fromAddressesCount
+      count
+      blockTimestamp {
+        year
+      }
+    }
+  }
+}
