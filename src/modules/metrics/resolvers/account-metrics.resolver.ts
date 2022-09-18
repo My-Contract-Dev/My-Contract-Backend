@@ -18,6 +18,14 @@ export class AccountMetricsResolver {
     @Args('dateRange', { type: () => [String], nullable: true })
     dateRange?: string[],
   ): Promise<AccountMetrics> {
+    if (addresses.length === 0) {
+      return {
+        balanceInUsd: 0,
+        calls: 0,
+        contracts: [],
+        users: 0,
+      };
+    }
     const cubeContractData = await this.cube.getContractData(
       addresses,
       dateRange,
