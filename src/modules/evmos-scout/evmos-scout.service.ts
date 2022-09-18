@@ -65,4 +65,27 @@ export class EvmosScoutService {
     }
     return data.result;
   }
+  @Cacheable({ ttlSeconds: 60 * 60 * 24 * 14 })
+  async getContractName(chainId: number, address: string) {
+    const { data } = await lastValueFrom(
+      this.httpService.get<
+        IEvmosScoutResponse<
+          {
+            ABI: string;
+            ContractName: string;
+          }[]
+        >
+      >('', {
+        params: {
+          module: 'contract',
+          action: 'getsourcecode',
+          address,
+        },
+      }),
+    );
+    if (!data.result || !data.result[0]) {
+      throw new Error('No data');
+    }
+    return data.result[0].ContractName;
+  }
 }
