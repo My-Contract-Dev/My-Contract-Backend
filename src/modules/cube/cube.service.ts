@@ -176,4 +176,35 @@ export class CubeService {
       timestamp: item.transactions.blockTimestamp!.day as string,
     }));
   }
+
+  async contractsCalls(
+    address: string[],
+    dateRange: string | string[] = 'Last 7 days',
+  ) {
+    const data = await this.cubeClient.load({
+      order: {
+        'Transactions.count': 'desc',
+      },
+      measures: ['Transactions.count'],
+      timeDimensions: [
+        {
+          dimension: 'Transactions.blockTimestamp',
+          // dateRange,
+          dateRange: dateRange as [string, string],
+        },
+      ],
+      dimensions: ['Transactions.toAddress'],
+      filters: [
+        {
+          member: 'Transactions.toAddress',
+          operator: 'contains',
+          values: address,
+        },
+      ],
+    });
+    return data.rawData().map((e) => ({
+      address: e['Transactions.toAddress'] as string,
+      count: e['Transactions.count'] as number,
+    }));
+  }
 }

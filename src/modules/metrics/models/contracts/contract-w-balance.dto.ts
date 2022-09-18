@@ -1,4 +1,4 @@
-import { Field, Float, ObjectType } from '@nestjs/graphql';
+import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class ContractWithBalanceDto {
@@ -10,4 +10,7 @@ export class ContractWithBalanceDto {
 
   @Field(() => Float, { nullable: false })
   balanceInUsd: number;
+
+  @Field(() => Int, { nullable: false })
+  calls: number;
 }

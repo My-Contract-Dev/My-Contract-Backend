@@ -22,6 +22,17 @@ export class AccountMetricsResolver {
       addresses,
       dateRange,
     );
+    const contractsCalls = await this.cube.contractsCalls(addresses, dateRange);
+    const contractCallsByAddress = contractsCalls.reduce<
+      Record<string, number>
+    >(
+      (acc, v) => ({
+        ...acc,
+        [v.address]: v.count,
+      }),
+      {},
+    );
+
     const assets = await this.currencyService.multyAddressAssets(
       addresses.map((a) => ({
         address: a,
@@ -39,6 +50,7 @@ export class AccountMetricsResolver {
         address: item.address,
         chainId: 9001,
         balanceInUsd: item.assets.reduce((acc, a) => acc + a.inUsd, 0),
+        calls: contractCallsByAddress[item.address] || 0,
       })),
     };
   }
