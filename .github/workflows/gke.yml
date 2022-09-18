@@ -39,7 +39,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    Alternative option - authentication via credentials json
     - id: 'auth'
       uses: 'google-github-actions/auth@v0'
       with:
