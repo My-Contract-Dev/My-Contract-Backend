@@ -10,6 +10,8 @@ query AccountData($addresses: [String!]!, $dateRange: [String!]!) {
     transactions {
       fromAddressesCount
       count
+      gas
+      averageGas
       blockTimestamp {
         year
       }

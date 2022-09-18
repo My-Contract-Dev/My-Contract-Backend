@@ -7,7 +7,7 @@ services:
       - /app/dist
     ports:
       - '3000:3000'
-    command: npm run start
+    command: npm run start:dev
     depends_on:
       - redis
   redis:

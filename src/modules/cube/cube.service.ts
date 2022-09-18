@@ -42,10 +42,14 @@ export class CubeService {
       (acc, item) => ({
         calls: acc.calls + item.transactions.count!,
         users: acc.users + item.transactions.fromAddressesCount!,
+        gas: acc.gas + (item.transactions.gas ?? 0),
+        averageGas: (acc.gas + (item.transactions.gas ?? 0)) / 2,
       }),
       {
         calls: 0,
         users: 0,
+        gas: 0,
+        averageGas: 0,
       },
     );
   }
