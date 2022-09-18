@@ -1,5 +1,9 @@
 import 'dotenv/config';
 import { CodegenConfig } from '@graphql-codegen/cli';
+import * as assert from 'assert';
+
+assert(process.env.CUBE_ENDPOINT, 'Missing CUBE_ENDPOINT');
+assert(process.env.CUBE_KEY, 'Missing CUBE_KEY');
 
 const config: CodegenConfig = {
   schema: [

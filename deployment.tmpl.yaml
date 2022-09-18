@@ -35,6 +35,10 @@ spec:
       containers:
       - name: mc-app-backend
         image: ${IMAGE_NAME}:${IMAGE_VERSION}
+        envFrom:
+          - configMapRef:
+              name: backend-dotenv
+
         ports:
         - containerPort: 3000
         resources:

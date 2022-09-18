@@ -26,6 +26,9 @@ env:
   DEPLOYMENT_NAME: mc-app-backend
   IMAGE_NAME: us-east1-docker.pkg.dev/my-contract-app/my-contract-repo/backend
   IMAGE_VERSION: ${{github.run_number}}
+  CUBE_ENDPOINT: ${{ secrets.CUBE_ENDPOINT }}
+  CUBE_KEY: ${{ secrets.CUBE_KEY }}
+  DOTENV: ${{ secrets.DOTENV }}
 
 jobs:
   build-and-push:
@@ -40,6 +43,13 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+    - name: Use Node.js 16
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+    - run: echo $DOTENV > .env
+    - run: npm install
+    - run: npm run build
 
     - id: 'auth'
       uses: 'google-github-actions/auth@v0'
@@ -52,10 +62,12 @@ jobs:
 
     - run: |-
         gcloud auth configure-docker us-east1-docker.pkg.dev
+  
 
     - name: Build and push Docker images
       uses: docker/build-push-action@v3.1.1
       with:
+        context: .
         push: true
         tags: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_VERSION }},${{ env.IMAGE_NAME }}:latest
         cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:latest
@@ -98,5 +110,3 @@ jobs:
     - name: Deploy
       run: |-
         kubectl apply -f deployment.yaml
-        kubectl rollout status deployment/$DEPLOYMENT_NAME
-        kubectl get services -o wide
