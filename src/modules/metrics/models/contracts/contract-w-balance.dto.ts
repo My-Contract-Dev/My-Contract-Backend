@@ -8,6 +8,6 @@ export class ContractWithBalanceDto {
   @Field(() => Float, { nullable: false })
   chainId: number;
 
-  @Field(() => String, { nullable: false })
+  @Field(() => Float, { nullable: false })
   balanceInUsd: number;
 }
