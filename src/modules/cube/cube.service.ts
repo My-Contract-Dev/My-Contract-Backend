@@ -43,7 +43,10 @@ export class CubeService {
         calls: acc.calls + item.transactions.count!,
         users: acc.users + item.transactions.fromAddressesCount!,
         gas: acc.gas + (item.transactions.gas ?? 0),
-        averageGas: (acc.gas + (item.transactions.gas ?? 0)) / 2,
+        averageGas:
+          acc.averageGas > 0
+            ? (acc.averageGas + (item.transactions.averageGas ?? 0)) / 2
+            : item.transactions.averageGas ?? 0,
       }),
       {
         calls: 0,
