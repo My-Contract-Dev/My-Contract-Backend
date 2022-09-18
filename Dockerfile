@@ -6,6 +6,7 @@ RUN npm install
 
 ADD . /app
 
+CMD npm run generate
 CMD npm run build
 
 CMD npm run start

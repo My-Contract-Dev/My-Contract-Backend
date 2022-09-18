@@ -16,6 +16,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mc-app-backend
+  namespace: mc-backend
 spec:
   replicas: 1
   selector:
@@ -32,10 +33,10 @@ spec:
         app: mc-app-backend
     spec:
       containers:
-      - name: hello-app
-        image: gcr.io/google-samples/hello-app:1.0
+      - name: mc-app-backend
+        image: ${IMAGE_NAME}:${IMAGE_VERSION}
         ports:
-        - containerPort: 8080
+        - containerPort: 3000
         resources:
           requests:
             cpu: 100m
@@ -46,6 +47,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mc-app-backend-service
+  namespace: mc-backend
 spec:
   type: LoadBalancer
   ports:
