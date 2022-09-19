@@ -36,6 +36,7 @@
     "@nestjs/core": "^9.0.0",
     "@nestjs/graphql": "^10.1.1",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/terminus": "^9.1.1",
     "@ntegral/nestjs-sentry": "^4.0.0",
     "@sentry/node": "^7.13.0",
     "@type-cacheable/core": "^10.1.2",

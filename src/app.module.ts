@@ -12,6 +12,7 @@ import { MetricsModule } from './modules/metrics/metrics.module';
 import { SentryModule } from '@ntegral/nestjs-sentry';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { GraphqlInterceptor } from '@ntegral/nestjs-sentry';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { GraphqlInterceptor } from '@ntegral/nestjs-sentry';
     CoingeckoModule,
     AssetsModule,
     ContractModule,
+    HealthModule,
   ],
   providers: [
     {

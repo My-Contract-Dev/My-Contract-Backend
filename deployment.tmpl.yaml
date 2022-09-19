@@ -41,6 +41,14 @@ spec:
 
         ports:
         - containerPort: 3000
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 5
+
         resources:
           requests:
             cpu: 100m
