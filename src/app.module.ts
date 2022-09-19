@@ -9,9 +9,19 @@ import { ContractModule } from './modules/contract/contract.module';
 import { CubeModule } from './modules/cube/cube.module';
 import { EvmosScoutModule } from './modules/evmos-scout/evmos-scout.module';
 import { MetricsModule } from './modules/metrics/metrics.module';
+import { SentryModule } from '@ntegral/nestjs-sentry';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { GraphqlInterceptor } from '@ntegral/nestjs-sentry';
 
 @Module({
   imports: [
+    SentryModule.forRoot({
+      dsn: 'https://25bdaaa3aa914c1aa93bcd22f3cb1adf@o1418233.ingest.sentry.io/6761124',
+      debug: false,
+      environment:
+        process.env.NODE_ENV === 'dev' ? 'development' : 'production',
+      logLevels: ['debug'],
+    }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
@@ -30,6 +40,12 @@ import { MetricsModule } from './modules/metrics/metrics.module';
     CoingeckoModule,
     AssetsModule,
     ContractModule,
+  ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useFactory: () => new GraphqlInterceptor(),
+    },
   ],
 })
 export class AppModule {}
