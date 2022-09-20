@@ -1,15 +1,18 @@
 import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
-export class ContractWithBalanceDto {
-  @Field(() => String, { nullable: false })
-  address: string;
+export class ContractMetricsDto {
+  @Field(() => Float, { nullable: false })
+  balance: number;
+
+  @Field(() => Int, { nullable: false })
+  gasUsed: number;
 
   @Field(() => Float, { nullable: false })
-  chainId: number;
+  averageGasUsed: number;
 
-  @Field(() => Float, { nullable: false })
-  balanceInUsd: number;
+  @Field(() => Int, { nullable: false })
+  users: number;
 
   @Field(() => Int, { nullable: false })
   calls: number;

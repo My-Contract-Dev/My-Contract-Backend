@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { Args, Query } from '@nestjs/graphql';
 import { ContractService } from 'src/modules/contract/contract.service';
 import { CubeService } from 'src/modules/cube/cube.service';
-import { AggregatedEventDto, SimpleChartValueDto } from '../models';
+import {
+  AggregatedEventDto,
+  ContractInputDto,
+  SimpleChartValueDto,
+} from '../models';
 
 @Injectable()
 export class EventsResolver {
@@ -13,14 +17,14 @@ export class EventsResolver {
 
   @Query(() => [AggregatedEventDto])
   async popularEvents(
-    @Args('address', { nullable: false })
-    address: string,
+    @Args('contract', { nullable: false, type: () => ContractInputDto })
+    contract: ContractInputDto,
   ): Promise<AggregatedEventDto[]> {
-    const data = await this.cubeService.getPopularEvents(address);
+    const data = await this.cubeService.getPopularEvents(contract.address);
     const topicNames = data.map((item) => item.topic);
     const decodedTopicNames = await this.contractService.decodeContractTopic(
-      9001,
-      address,
+      contract.chainId,
+      contract.address,
       topicNames,
     );
     return data.map((item, index) => ({
@@ -31,9 +35,10 @@ export class EventsResolver {
 
   @Query(() => [SimpleChartValueDto])
   async totalEvents(
-    @Args('address', { nullable: false }) address: string,
+    @Args('contract', { nullable: false, type: () => ContractInputDto })
+    contract: ContractInputDto,
   ): Promise<SimpleChartValueDto[]> {
-    const data = await this.cubeService.getTotalEvents(address);
+    const data = await this.cubeService.getTotalEvents(contract.address);
     return data.map((item) => ({
       timestamp: item.timestamp,
       value: item.count,

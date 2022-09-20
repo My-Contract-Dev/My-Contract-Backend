@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { Cacheable } from '@type-cacheable/core';
 import { GraphQLClient } from 'graphql-request';
 import cubejs, { CubejsApi } from '@cubejs-client/core';
+import { startOfDay, sub } from 'date-fns';
 
 import { ICubeContractData } from './models';
 import { getSdk } from './schema.generated';
@@ -29,10 +30,16 @@ export class CubeService {
     });
   }
 
+  defaultDateRange(): [string, string] {
+    const now = new Date();
+    const weekAgo = startOfDay(sub(now, { days: 7 }));
+    return [weekAgo.toISOString(), now.toISOString()];
+  }
+
   @Cacheable({ ttlSeconds: 5 })
   async getContractData(
     addresses: string[],
-    dateRange: string[] = ['Last 7 days'],
+    dateRange: string[] = this.defaultDateRange(),
   ): Promise<ICubeContractData> {
     const data = await this.sdk.AccountData({
       addresses: addresses.map((a) => a.toLocaleLowerCase()),
@@ -42,15 +49,22 @@ export class CubeService {
       (acc, item) => ({
         calls: acc.calls + item.transactions.count!,
         users: acc.users + item.transactions.fromAddressesCount!,
+        gas: acc.gas + (item.transactions.gas ?? 0),
+        averageGas:
+          acc.averageGas > 0
+            ? (acc.averageGas + (item.transactions.averageGas ?? 0)) / 2
+            : item.transactions.averageGas ?? 0,
       }),
       {
         calls: 0,
         users: 0,
+        gas: 0,
+        averageGas: 0,
       },
     );
   }
 
-  async getPopularEvents(address: string, dateRange = 'Last 7 days') {
+  async getPopularEvents(address: string, dateRange = this.defaultDateRange()) {
     const data = await this.cubeClient.load({
       order: {
         'Logs.count': 'desc',
@@ -78,7 +92,7 @@ export class CubeService {
     }));
   }
 
-  async getPopularCalls(address: string, dateRange = 'Last 7 days') {
+  async getPopularCalls(address: string, dateRange = this.defaultDateRange()) {
     const data = await this.cubeClient.load({
       order: {
         'Transactions.count': 'desc',
@@ -106,7 +120,7 @@ export class CubeService {
     }));
   }
 
-  async getTotalEvents(address: string, dateRange = 'Last 7 days') {
+  async getTotalEvents(address: string, dateRange = this.defaultDateRange()) {
     const data = await this.sdk.EventsCountQuery({
       addresses: [address],
       dateRange,
@@ -118,7 +132,7 @@ export class CubeService {
     }));
   }
 
-  async getTotalCalls(address: string, dateRange = 'Last 7 days') {
+  async getTotalCalls(address: string, dateRange = this.defaultDateRange()) {
     const data = await this.sdk.CallsCountQuery({
       addresses: [address],
       dateRange,
@@ -130,7 +144,7 @@ export class CubeService {
     }));
   }
 
-  async getCallsByGas(address: string, dateRange = 'Last 7 days') {
+  async getCallsByGas(address: string, dateRange = this.defaultDateRange()) {
     const data = await this.cubeClient.load({
       order: {
         'Transactions.averageGas': 'desc',
@@ -159,7 +173,7 @@ export class CubeService {
     }));
   }
 
-  async averageGasByDay(address: string, dateRange = 'Last 7 days') {
+  async averageGasByDay(address: string, dateRange = this.defaultDateRange()) {
     const data = await this.sdk.GasByDayQuery({
       addresses: [address],
       dateRange,
@@ -167,6 +181,37 @@ export class CubeService {
     return data.cube.map((item) => ({
       averageGas: item.transactions.averageGas as number,
       timestamp: item.transactions.blockTimestamp!.day as string,
+    }));
+  }
+
+  async contractsCalls(
+    address: string[],
+    dateRange: string | string[] = this.defaultDateRange(),
+  ) {
+    const data = await this.cubeClient.load({
+      order: {
+        'Transactions.count': 'desc',
+      },
+      measures: ['Transactions.count'],
+      timeDimensions: [
+        {
+          dimension: 'Transactions.blockTimestamp',
+          // dateRange,
+          dateRange: dateRange as [string, string],
+        },
+      ],
+      dimensions: ['Transactions.toAddress'],
+      filters: [
+        {
+          member: 'Transactions.toAddress',
+          operator: 'contains',
+          values: address,
+        },
+      ],
+    });
+    return data.rawData().map((e) => ({
+      address: e['Transactions.toAddress'] as string,
+      count: e['Transactions.count'] as number,
     }));
   }
 }

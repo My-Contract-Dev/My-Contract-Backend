@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { Args, Query } from '@nestjs/graphql';
 import { ContractService } from 'src/modules/contract/contract.service';
 import { CubeService } from 'src/modules/cube/cube.service';
-import { AggregatedMethodGasDto, SimpleChartValueDto } from '../models';
+import {
+  AggregatedMethodGasDto,
+  ContractInputDto,
+  SimpleChartValueDto,
+} from '../models';
 
 @Injectable()
 export class GasResolver {
@@ -13,13 +17,14 @@ export class GasResolver {
 
   @Query(() => [AggregatedMethodGasDto])
   async averageGas(
-    @Args('address', { nullable: false }) address: string,
+    @Args('contract', { nullable: false, type: () => ContractInputDto })
+    contract: ContractInputDto,
   ): Promise<AggregatedMethodGasDto[]> {
-    const data = await this.cubeService.getCallsByGas(address);
+    const data = await this.cubeService.getCallsByGas(contract.address);
     const methodNames = data.map((item) => item.method);
     const decodedMethods = await this.contractService.decodeContractCallsigns(
-      9001,
-      address,
+      contract.chainId,
+      contract.address,
       methodNames,
     );
     return data.map((item, index) => ({
@@ -30,9 +35,10 @@ export class GasResolver {
 
   @Query(() => [SimpleChartValueDto])
   async averageGasByDate(
-    @Args('address', { nullable: false }) address: string,
+    @Args('contract', { nullable: false, type: () => ContractInputDto })
+    contract: ContractInputDto,
   ): Promise<SimpleChartValueDto[]> {
-    const data = await this.cubeService.averageGasByDay(address);
+    const data = await this.cubeService.averageGasByDay(contract.address);
     return data.map((item) => ({
       value: item.averageGas,
       timestamp: item.timestamp,
