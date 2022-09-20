@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { Cacheable } from '@type-cacheable/core';
 import { GraphQLClient } from 'graphql-request';
 import cubejs, { CubejsApi } from '@cubejs-client/core';
+import { startOfDay, sub } from 'date-fns';
 
 import { ICubeContractData } from './models';
 import { getSdk } from './schema.generated';
@@ -29,10 +30,16 @@ export class CubeService {
     });
   }
 
+  defaultDateRange(): [string, string] {
+    const now = new Date();
+    const weekAgo = startOfDay(sub(now, { days: 7 }));
+    return [weekAgo.toISOString(), now.toISOString()];
+  }
+
   @Cacheable({ ttlSeconds: 5 })
   async getContractData(
     addresses: string[],
-    dateRange: string[] = ['Last 7 days'],
+    dateRange: string[] = this.defaultDateRange(),
   ): Promise<ICubeContractData> {
     const data = await this.sdk.AccountData({
       addresses: addresses.map((a) => a.toLocaleLowerCase()),
@@ -57,7 +64,7 @@ export class CubeService {
     );
   }
 
-  async getPopularEvents(address: string, dateRange = 'Last 7 days') {
+  async getPopularEvents(address: string, dateRange = this.defaultDateRange()) {
     const data = await this.cubeClient.load({
       order: {
         'Logs.count': 'desc',
@@ -85,7 +92,7 @@ export class CubeService {
     }));
   }
 
-  async getPopularCalls(address: string, dateRange = 'Last 7 days') {
+  async getPopularCalls(address: string, dateRange = this.defaultDateRange()) {
     const data = await this.cubeClient.load({
       order: {
         'Transactions.count': 'desc',
@@ -113,7 +120,7 @@ export class CubeService {
     }));
   }
 
-  async getTotalEvents(address: string, dateRange = 'Last 7 days') {
+  async getTotalEvents(address: string, dateRange = this.defaultDateRange()) {
     const data = await this.sdk.EventsCountQuery({
       addresses: [address],
       dateRange,
@@ -125,7 +132,7 @@ export class CubeService {
     }));
   }
 
-  async getTotalCalls(address: string, dateRange = 'Last 7 days') {
+  async getTotalCalls(address: string, dateRange = this.defaultDateRange()) {
     const data = await this.sdk.CallsCountQuery({
       addresses: [address],
       dateRange,
@@ -137,7 +144,7 @@ export class CubeService {
     }));
   }
 
-  async getCallsByGas(address: string, dateRange = 'Last 7 days') {
+  async getCallsByGas(address: string, dateRange = this.defaultDateRange()) {
     const data = await this.cubeClient.load({
       order: {
         'Transactions.averageGas': 'desc',
@@ -166,7 +173,7 @@ export class CubeService {
     }));
   }
 
-  async averageGasByDay(address: string, dateRange = 'Last 7 days') {
+  async averageGasByDay(address: string, dateRange = this.defaultDateRange()) {
     const data = await this.sdk.GasByDayQuery({
       addresses: [address],
       dateRange,
@@ -179,7 +186,7 @@ export class CubeService {
 
   async contractsCalls(
     address: string[],
-    dateRange: string | string[] = 'Last 7 days',
+    dateRange: string | string[] = this.defaultDateRange(),
   ) {
     const data = await this.cubeClient.load({
       order: {
