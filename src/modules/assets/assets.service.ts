@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { SentryService } from '@ntegral/nestjs-sentry';
 import { Cacheable } from '@type-cacheable/core';
 import { BigNumber } from 'ethers';
+import { prepareAddress } from 'src/utils';
 import { CoinGeckService } from '../coingecko/coingecko.service';
 import { EvmosScoutService } from '../evmos-scout/evmos-scout.service';
+import { IEvmosScoutTokensBalance } from '../evmos-scout/models';
 import { IAddress, IAddressAssets } from './interfaces';
 
 @Injectable()
@@ -10,11 +13,19 @@ export class AssetsService {
   constructor(
     private scout: EvmosScoutService,
     private coinGecko: CoinGeckService,
+    private sentryService: SentryService,
   ) {}
 
   @Cacheable({ ttlSeconds: 30 })
-  async addressAssets({ address, chainId }: IAddress): Promise<IAddressAssets> {
-    const tokens = await this.scout.getAddressTokens(chainId, address);
+  async addressAssets(contract: IAddress): Promise<IAddressAssets> {
+    const address = prepareAddress(contract.address);
+    const { chainId } = contract;
+    let tokens: IEvmosScoutTokensBalance[] = [];
+    try {
+      tokens = await this.scout.getAddressTokens(chainId, address);
+    } catch (e) {
+      this.sentryService.error(e);
+    }
     // TODO: use generic platform
     const availableTokens = await this.coinGecko.coinsList('evmos');
     const payableTokens = tokens
@@ -27,7 +38,12 @@ export class AssetsService {
       }));
     const tokenIds = payableTokens.map((t) => t.metadata.id || '');
     const exchangeRates = await this.coinGecko.exchangeRates(tokenIds, chainId);
-    const nativeBalance = await this.scout.getBalance(chainId, address);
+    let nativeBalance = '0x0';
+    try {
+      nativeBalance = await this.scout.getBalance(chainId, address);
+    } catch (e) {
+      this.sentryService.error(e);
+    }
 
     return {
       address,

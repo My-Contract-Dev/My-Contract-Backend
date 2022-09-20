@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Args, Query } from '@nestjs/graphql';
 import { ContractService } from 'src/modules/contract/contract.service';
 import { CubeService } from 'src/modules/cube/cube.service';
+import { prepareAddress } from 'src/utils';
 import {
   AggregatedEventDto,
   ContractInputDto,
@@ -20,11 +21,13 @@ export class EventsResolver {
     @Args('contract', { nullable: false, type: () => ContractInputDto })
     contract: ContractInputDto,
   ): Promise<AggregatedEventDto[]> {
-    const data = await this.cubeService.getPopularEvents(contract.address);
+    const data = await this.cubeService.getPopularEvents(
+      prepareAddress(contract.address),
+    );
     const topicNames = data.map((item) => item.topic);
     const decodedTopicNames = await this.contractService.decodeContractTopic(
       contract.chainId,
-      contract.address,
+      prepareAddress(contract.address),
       topicNames,
     );
     return data.map((item, index) => ({
@@ -38,7 +41,9 @@ export class EventsResolver {
     @Args('contract', { nullable: false, type: () => ContractInputDto })
     contract: ContractInputDto,
   ): Promise<SimpleChartValueDto[]> {
-    const data = await this.cubeService.getTotalEvents(contract.address);
+    const data = await this.cubeService.getTotalEvents(
+      prepareAddress(contract.address),
+    );
     return data.map((item) => ({
       timestamp: item.timestamp,
       value: item.count,

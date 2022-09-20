@@ -1,6 +1,7 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { AssetsService } from 'src/modules/assets/assets.service';
 import { CubeService } from 'src/modules/cube/cube.service';
+import { prepareAddress } from 'src/utils';
 import { ContractInputDto, ContractMetricsDto } from '../models';
 
 @Resolver(() => ContractMetricsDto)
@@ -21,7 +22,7 @@ export class ContractMetricsResolver {
     const totalAmount = assets.assets.reduce((acc, v) => acc + v.inUsd, 0);
 
     const contractMetrics = await this.cubeService.getContractData(
-      [contract.address],
+      [prepareAddress(contract.address)],
       dateRange,
     );
 

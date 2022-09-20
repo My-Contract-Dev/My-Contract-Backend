@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { ValidationPipe } from '@nestjs/common';
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { AssetsService } from 'src/modules/assets/assets.service';
 import { CubeService } from 'src/modules/cube/cube.service';
-import { AccountMetrics } from '../models';
+import { prepareAddress } from 'src/utils';
+import { AccountMetrics, ContractInputDto } from '../models';
 
 @Resolver(() => AccountMetrics)
 export class AccountMetricsResolver {
@@ -17,8 +19,26 @@ export class AccountMetricsResolver {
     addresses: string[],
     @Args('dateRange', { type: () => [String], nullable: true })
     dateRange?: string[],
+  ) {
+    return this.accountMetricsV2(
+      addresses.map((a) => {
+        return {
+          address: a,
+          chainId: 9001,
+        };
+      }),
+      dateRange,
+    );
+  }
+
+  @Query(() => AccountMetrics)
+  async accountMetricsV2(
+    @Args('contracts', { type: () => [ContractInputDto], nullable: false })
+    contracts: ContractInputDto[],
+    @Args('dateRange', { type: () => [String], nullable: true })
+    dateRange?: string[],
   ): Promise<AccountMetrics> {
-    if (addresses.length === 0) {
+    if (contracts.length === 0) {
       return {
         balanceInUsd: 0,
         calls: 0,
@@ -26,6 +46,7 @@ export class AccountMetricsResolver {
         users: 0,
       };
     }
+    const addresses = contracts.map((c) => prepareAddress(c.address));
     const cubeContractData = await this.cube.getContractData(
       addresses,
       dateRange,
